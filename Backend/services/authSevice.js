@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 
 async function checkIfUserExists(email) {
     try {
-        const user = await UserData.findOne({ email });
+        const user = await findUserByEmail(email, '-password');
         return !!user;
     } catch (error) {
         console.error('Error checking if user exists:', error);
@@ -11,10 +11,19 @@ async function checkIfUserExists(email) {
     }
 }
 
+async function findUserByEmail(email, selectFields = '') {
+    return await UserData.findOne({ email }).select(selectFields).lean();
+}
+
+async function findUserById(id, selectFields = '') {
+    return await UserData.findById(id).select(selectFields).lean();
+}
+
+
 async function getUser(id) {
     try {
         console.log("hey")
-        const user = await UserData.findById(id).select('-password');
+        const user = await findUserById(id, '-password');
 
         console.log("user", user)
         return user;
@@ -57,7 +66,7 @@ async function login(userData) {
 
         console.log("email", email)
         console.log("password", password)
-        const user = await UserData.findOne({email});
+        const user = await findUserByEmail(email, '-password');
 
         if (!user){
             returnData = {
